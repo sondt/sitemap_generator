@@ -2,7 +2,7 @@
 
 [![Crates.io](https://img.shields.io/crates/v/sitemap_generator.svg)](https://crates.io/crates/sitemap_generator)
 [![Documentation](https://docs.rs/sitemap_generator/badge.svg)](https://docs.rs/sitemap_generator)
-[![MIT License](https://img.shields.io/badge/license-MIT.svg)](LICENSE)
+[![MIT License](https://img.shields.io/badge/license-MIT.svg)](LICENSE-MIT)
 
 A high-performance Rust library for generating XML sitemaps compliant with the [sitemaps.org protocol 0.9](https://www.sitemaps.org/protocol.html).
 
@@ -240,23 +240,27 @@ Use with Axum, Actix-web, Rocket, or other web frameworks:
 use axum::{
     response::{Response, IntoResponse},
     http::{StatusCode, header},
+    body::Body,
 };
-use sitemap_generator::{SitemapBuilder, UrlEntry};
+use sitemap_generator::{SitemapIndexBuilder, SitemapIndexEntry};
 
 async fn sitemap() -> impl IntoResponse {
     let mut builder = SitemapBuilder::new();
-    builder.add_url(UrlEntry::new("https://example.com/"));
+    builder.add_sitemap(SitemapIndexEntry::new("https://example.com/));
 
     match builder.build_bytes() {
         Ok(bytes) => Response::builder()
             .status(StatusCode::OK)
-            .header(header::CONTENT_TYPE, "application/xml; charset=utf-8")
-            .body(bytes.into())
+            .header(header::CONTENT_TYPE, "application/xml")
+            .body(Body::from(bytes))
             .unwrap(),
-        Err(_) => Response::builder()
-            .status(StatusCode::INTERNAL_SERVER_ERROR)
-            .body(Vec::new().into())
-            .unwrap(),
+        Err(e) => {
+            println!("Error generating sitemap index: {}", e);
+            Response::builder()
+                .status(StatusCode::INTERNAL_SERVER_ERROR)
+                .body(Body::from(Vec::<u8>::new()))
+                .unwrap()
+        }
     }
 }
 
@@ -274,28 +278,8 @@ async fn sitemap_compressed() -> impl IntoResponse {
             .unwrap(),
         Err(_) => Response::builder()
             .status(StatusCode::INTERNAL_SERVER_ERROR)
-            .body(Vec::new().into())
+            .body(Body::from(Vec::<u8>::new()))
             .unwrap(),
-    }
-}
-```
-
-#### Actix-web Example
-
-```rust
-use actix_web::{web, HttpResponse, Result};
-use sitemap_generator::{SitemapBuilder, UrlEntry};
-
-async fn sitemap() -> Result<HttpResponse> {
-    let mut builder = SitemapBuilder::new();
-    builder.add_url(UrlEntry::new("https://example.com/"));
-
-    match builder.build_compressed_bytes() {
-        Ok(bytes) => Ok(HttpResponse::Ok()
-            .content_type("application/xml")
-            .insert_header(("Content-Encoding", "gzip"))
-            .body(bytes)),
-        Err(_) => Ok(HttpResponse::InternalServerError().finish()),
     }
 }
 ```
