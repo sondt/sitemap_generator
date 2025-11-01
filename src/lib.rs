@@ -17,6 +17,7 @@
 //! - **Parsing**: Read and parse existing sitemap files
 //! - **Memory Efficient**: ~140 bytes/URL during generation, 0 bytes after (proven)
 //! - **High Performance**: ~830K URLs/second, immediate memory cleanup
+//! - **Optimized Builders**: Pre-allocate capacity with `with_capacity()` for better performance
 //!
 //! ## Quick Start Examples
 //!
@@ -25,7 +26,8 @@
 //! ```rust
 //! use sitemap_generator::{SitemapBuilder, UrlEntry, ChangeFreq};
 //!
-//! let mut builder = SitemapBuilder::new();
+//! // Use with_capacity() if you know the number of URLs in advance
+//! let mut builder = SitemapBuilder::with_capacity(1000);
 //!
 //! builder.add_url(UrlEntry::new("https://example.com/")
 //!     .lastmod("2025-11-01")

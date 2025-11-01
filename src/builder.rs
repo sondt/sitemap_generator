@@ -26,6 +26,26 @@ impl SitemapBuilder {
         }
     }
 
+    /// Create a new SitemapBuilder with pre-allocated capacity
+    ///
+    /// This is more efficient when you know the number of URLs in advance.
+    ///
+    /// # Example
+    /// ```
+    /// use sitemap_generator::{SitemapBuilder, UrlEntry};
+    ///
+    /// let mut builder = SitemapBuilder::with_capacity(1000);
+    /// for i in 0..1000 {
+    ///     builder.add_url(UrlEntry::new(format!("https://example.com/page{}", i)));
+    /// }
+    /// ```
+    pub fn with_capacity(capacity: usize) -> Self {
+        Self {
+            entries: Vec::with_capacity(capacity),
+            validate: true,
+        }
+    }
+
     /// Enable or disable validation (enabled by default)
     pub fn validate(mut self, validate: bool) -> Self {
         self.validate = validate;
@@ -181,6 +201,26 @@ impl ImageSitemapBuilder {
         }
     }
 
+    /// Create a new ImageSitemapBuilder with pre-allocated capacity
+    ///
+    /// # Example
+    /// ```
+    /// use sitemap_generator::{ImageSitemapBuilder, UrlEntry, UrlWithImages, ImageEntry};
+    ///
+    /// let mut builder = ImageSitemapBuilder::with_capacity(500);
+    /// for i in 0..500 {
+    ///     let url = UrlWithImages::new(UrlEntry::new(format!("https://example.com/page{}", i)))
+    ///         .add_image(ImageEntry::new(format!("https://example.com/image{}.jpg", i)));
+    ///     builder.add_url(url);
+    /// }
+    /// ```
+    pub fn with_capacity(capacity: usize) -> Self {
+        Self {
+            entries: Vec::with_capacity(capacity),
+            validate: true,
+        }
+    }
+
     /// Enable or disable validation (enabled by default)
     pub fn validate(mut self, validate: bool) -> Self {
         self.validate = validate;
@@ -301,6 +341,30 @@ impl VideoSitemapBuilder {
     pub fn new() -> Self {
         Self {
             entries: Vec::new(),
+            validate: true,
+        }
+    }
+
+    /// Create a new VideoSitemapBuilder with pre-allocated capacity
+    ///
+    /// # Example
+    /// ```
+    /// use sitemap_generator::{VideoSitemapBuilder, UrlEntry, UrlWithVideos, VideoEntry};
+    ///
+    /// let mut builder = VideoSitemapBuilder::with_capacity(200);
+    /// for i in 0..200 {
+    ///     let url = UrlWithVideos::new(UrlEntry::new(format!("https://example.com/video{}", i)))
+    ///         .add_video(VideoEntry::new(
+    ///             format!("https://example.com/thumb{}.jpg", i),
+    ///             format!("Video {}", i),
+    ///             "Description"
+    ///         ));
+    ///     builder.add_url(url);
+    /// }
+    /// ```
+    pub fn with_capacity(capacity: usize) -> Self {
+        Self {
+            entries: Vec::with_capacity(capacity),
             validate: true,
         }
     }
@@ -451,6 +515,26 @@ impl SitemapIndexBuilder {
         }
     }
 
+    /// Create a new SitemapIndexBuilder with pre-allocated capacity
+    ///
+    /// # Example
+    /// ```
+    /// use sitemap_generator::{SitemapIndexBuilder, SitemapIndexEntry};
+    ///
+    /// let mut builder = SitemapIndexBuilder::with_capacity(50);
+    /// for i in 0..50 {
+    ///     builder.add_sitemap(
+    ///         SitemapIndexEntry::new(format!("https://example.com/sitemap{}.xml.gz", i))
+    ///     );
+    /// }
+    /// ```
+    pub fn with_capacity(capacity: usize) -> Self {
+        Self {
+            entries: Vec::with_capacity(capacity),
+            validate: true,
+        }
+    }
+
     /// Enable or disable validation (enabled by default)
     pub fn validate(mut self, validate: bool) -> Self {
         self.validate = validate;
@@ -562,6 +646,26 @@ impl NewsSitemapBuilder {
     pub fn new() -> Self {
         Self {
             entries: Vec::new(),
+            validate: true,
+        }
+    }
+
+    /// Create a new news sitemap builder with pre-allocated capacity
+    ///
+    /// # Example
+    /// ```
+    /// use sitemap_generator::{NewsSitemapBuilder, UrlEntry, UrlWithNews, NewsEntry, NewsPublication};
+    ///
+    /// let mut builder = NewsSitemapBuilder::with_capacity(1000);
+    /// for i in 0..1000 {
+    ///     let publication = NewsPublication::new("News Site", "en");
+    ///     let news = NewsEntry::new(publication, "2025-11-01T10:00:00Z", format!("Article {}", i));
+    ///     builder.add_url(UrlWithNews::new(UrlEntry::new(format!("https://example.com/news{}", i)), news));
+    /// }
+    /// ```
+    pub fn with_capacity(capacity: usize) -> Self {
+        Self {
+            entries: Vec::with_capacity(capacity),
             validate: true,
         }
     }
@@ -695,6 +799,26 @@ impl CombinedSitemapBuilder {
     pub fn new() -> Self {
         Self {
             entries: Vec::new(),
+            validate: true,
+        }
+    }
+
+    /// Create a new combined sitemap builder with pre-allocated capacity
+    ///
+    /// # Example
+    /// ```
+    /// use sitemap_generator::{CombinedSitemapBuilder, UrlEntry, UrlWithExtensions, ImageEntry};
+    ///
+    /// let mut builder = CombinedSitemapBuilder::with_capacity(500);
+    /// for i in 0..500 {
+    ///     let url = UrlWithExtensions::new(UrlEntry::new(format!("https://example.com/page{}", i)))
+    ///         .add_image(ImageEntry::new(format!("https://example.com/img{}.jpg", i)));
+    ///     builder.add_url(url);
+    /// }
+    /// ```
+    pub fn with_capacity(capacity: usize) -> Self {
+        Self {
+            entries: Vec::with_capacity(capacity),
             validate: true,
         }
     }

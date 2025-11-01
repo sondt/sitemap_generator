@@ -761,3 +761,144 @@ fn test_combined_sitemap_file_write() {
     assert!(content.contains("xmlns:image"));
     assert!(content.contains("xmlns:video"));
 }
+
+// ============================================================================
+// with_capacity() Tests
+// ============================================================================
+
+#[test]
+fn test_sitemap_builder_with_capacity() {
+    let mut builder = SitemapBuilder::with_capacity(100);
+
+    for i in 0..100 {
+        builder.add_url(UrlEntry::new(format!("https://example.com/page{}", i)));
+    }
+
+    assert_eq!(builder.len(), 100);
+    let xml = builder.build().unwrap();
+    assert!(xml.contains("<loc>https://example.com/page0</loc>"));
+    assert!(xml.contains("<loc>https://example.com/page99</loc>"));
+}
+
+#[test]
+fn test_image_sitemap_builder_with_capacity() {
+    let mut builder = ImageSitemapBuilder::with_capacity(50);
+
+    for i in 0..50 {
+        let url = UrlWithImages::new(
+            UrlEntry::new(format!("https://example.com/gallery{}", i))
+        ).add_image(
+            ImageEntry::new(format!("https://example.com/img{}.jpg", i))
+                .title(format!("Image {}", i))
+        );
+        builder.add_url(url);
+    }
+
+    assert_eq!(builder.len(), 50);
+    let xml = builder.build().unwrap();
+    assert!(xml.contains("xmlns:image"));
+    assert!(xml.contains("<image:loc>https://example.com/img0.jpg</image:loc>"));
+}
+
+#[test]
+fn test_video_sitemap_builder_with_capacity() {
+    let mut builder = VideoSitemapBuilder::with_capacity(30);
+
+    for i in 0..30 {
+        let url = UrlWithVideos::new(
+            UrlEntry::new(format!("https://example.com/video{}", i))
+        ).add_video(
+            VideoEntry::new(
+                format!("https://example.com/thumb{}.jpg", i),
+                format!("Video {}", i),
+                "Description"
+            ).duration(120)
+        );
+        builder.add_url(url);
+    }
+
+    assert_eq!(builder.len(), 30);
+    let xml = builder.build().unwrap();
+    assert!(xml.contains("xmlns:video"));
+    assert!(xml.contains("<video:title>Video 0</video:title>"));
+}
+
+#[test]
+fn test_sitemap_index_builder_with_capacity() {
+    let mut builder = SitemapIndexBuilder::with_capacity(10);
+
+    for i in 0..10 {
+        builder.add_sitemap(
+            SitemapIndexEntry::new(format!("https://example.com/sitemap{}.xml.gz", i))
+                .lastmod("2025-11-01")
+        );
+    }
+
+    assert_eq!(builder.len(), 10);
+    let xml = builder.build().unwrap();
+    assert!(xml.contains("<loc>https://example.com/sitemap0.xml.gz</loc>"));
+    assert!(xml.contains("<loc>https://example.com/sitemap9.xml.gz</loc>"));
+}
+
+#[test]
+fn test_news_sitemap_builder_with_capacity() {
+    let mut builder = NewsSitemapBuilder::with_capacity(100);
+
+    for i in 0..100 {
+        let publication = NewsPublication::new("TechDaily", "en");
+        let news = NewsEntry::new(
+            publication,
+            "2025-11-01T10:00:00Z",
+            format!("Article {}", i)
+        );
+        builder.add_url(UrlWithNews::new(
+            UrlEntry::new(format!("https://example.com/news{}", i)),
+            news
+        ));
+    }
+
+    assert_eq!(builder.len(), 100);
+    let xml = builder.build().unwrap();
+    assert!(xml.contains("xmlns:news"));
+    assert!(xml.contains("<news:title>Article 0</news:title>"));
+}
+
+#[test]
+fn test_combined_sitemap_builder_with_capacity() {
+    let mut builder = CombinedSitemapBuilder::with_capacity(50);
+
+    for i in 0..50 {
+        let url = UrlWithExtensions::new(
+            UrlEntry::new(format!("https://example.com/page{}", i))
+        ).add_image(
+            ImageEntry::new(format!("https://example.com/img{}.jpg", i))
+        );
+        builder.add_url(url);
+    }
+
+    assert_eq!(builder.len(), 50);
+    let xml = builder.build().unwrap();
+    assert!(xml.contains("xmlns:image"));
+}
+
+#[test]
+fn test_with_capacity_zero() {
+    // Should not panic with zero capacity
+    let mut builder = SitemapBuilder::with_capacity(0);
+    builder.add_url(UrlEntry::new("https://example.com/"));
+    assert_eq!(builder.len(), 1);
+    assert!(builder.build().is_ok());
+}
+
+#[test]
+fn test_with_capacity_large() {
+    // Test with large capacity (should pre-allocate)
+    let mut builder = SitemapBuilder::with_capacity(10_000);
+
+    for i in 0..10_000 {
+        builder.add_url(UrlEntry::new(format!("https://example.com/page{}", i)));
+    }
+
+    assert_eq!(builder.len(), 10_000);
+    assert!(builder.build().is_ok());
+}

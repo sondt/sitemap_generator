@@ -43,127 +43,38 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     println!("=== Framework Integration Examples ===\n");
 
-    // Example 1: Axum
+    // Example with Axum
     println!("--- Axum Example ---");
     println!(r#"
 use axum::{{
     response::{{Response, IntoResponse}},
     http::{{StatusCode, header}},
+    body::Body,
 }};
-use sitemap_generator::{{SitemapBuilder, UrlEntry}};
+use sitemap_generator::{{SitemapIndexBuilder, SitemapIndexEntry}};
 
 async fn sitemap() -> impl IntoResponse {{
     let mut builder = SitemapBuilder::new();
-    builder.add_url(UrlEntry::new("https://example.com/"));
+    builder.add_sitemap(SitemapIndexEntry::new("https://example.com/));
 
     match builder.build_bytes() {{
-        Ok(bytes) => Response::builder()
-            .status(StatusCode::OK)
-            .header(header::CONTENT_TYPE, "application/xml; charset=utf-8")
-            .body(bytes.into())
-            .unwrap(),
-        Err(_) => Response::builder()
-            .status(StatusCode::INTERNAL_SERVER_ERROR)
-            .body(Vec::new().into())
-            .unwrap(),
-    }}
-}}
-
-// With compression:
-async fn sitemap_compressed() -> impl IntoResponse {{
-    let mut builder = SitemapBuilder::new();
-    builder.add_url(UrlEntry::new("https://example.com/"));
-
-    match builder.build_compressed_bytes() {{
         Ok(bytes) => Response::builder()
             .status(StatusCode::OK)
             .header(header::CONTENT_TYPE, "application/xml")
-            .header(header::CONTENT_ENCODING, "gzip")
-            .body(bytes.into())
+            .body(Body::from(bytes))
             .unwrap(),
-        Err(_) => Response::builder()
-            .status(StatusCode::INTERNAL_SERVER_ERROR)
-            .body(Vec::new().into())
-            .unwrap(),
-    }}
-}}
-"#);
-
-    // Example 2: Actix-web
-    println!("\n--- Actix-web Example ---");
-    println!(r#"
-use actix_web::{{web, HttpResponse, Result}};
-use sitemap_generator::{{SitemapBuilder, UrlEntry}};
-
-async fn sitemap() -> Result<HttpResponse> {{
-    let mut builder = SitemapBuilder::new();
-    builder.add_url(UrlEntry::new("https://example.com/"));
-
-    match builder.build_bytes() {{
-        Ok(bytes) => Ok(HttpResponse::Ok()
-            .content_type("application/xml; charset=utf-8")
-            .body(bytes)),
-        Err(_) => Ok(HttpResponse::InternalServerError().finish()),
+        Err(e) => {{
+            println!("Error generating sitemap index: {{}}", e);
+            Response::builder()
+                .status(StatusCode::INTERNAL_SERVER_ERROR)
+                .body(Body::from(Vec::<u8>::new()))
+                .unwrap()
+        }}
     }}
 }}
 
-// With compression:
-async fn sitemap_compressed() -> Result<HttpResponse> {{
-    let mut builder = SitemapBuilder::new();
-    builder.add_url(UrlEntry::new("https://example.com/"));
-
-    match builder.build_compressed_bytes() {{
-        Ok(bytes) => Ok(HttpResponse::Ok()
-            .content_type("application/xml")
-            .insert_header(("Content-Encoding", "gzip"))
-            .body(bytes)),
-        Err(_) => Ok(HttpResponse::InternalServerError().finish()),
-    }}
-}}
 "#);
 
-    // Example 3: Rocket
-    println!("\n--- Rocket Example ---");
-    println!(r#"
-use rocket::{{State, response::content::RawXml}};
-use sitemap_generator::{{SitemapBuilder, UrlEntry}};
-
-#[get("/sitemap.xml")]
-fn sitemap() -> Option<RawXml<Vec<u8>>> {{
-    let mut builder = SitemapBuilder::new();
-    builder.add_url(UrlEntry::new("https://example.com/"));
-
-    builder.build_bytes()
-        .ok()
-        .map(RawXml)
-}}
-"#);
-
-    // Example 4: Warp
-    println!("\n--- Warp Example ---");
-    println!(r#"
-use warp::{{Filter, reply, http::Response}};
-use sitemap_generator::{{SitemapBuilder, UrlEntry}};
-
-fn sitemap() -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {{
-    warp::path("sitemap.xml")
-        .map(|| {{
-            let mut builder = SitemapBuilder::new();
-            builder.add_url(UrlEntry::new("https://example.com/"));
-
-            match builder.build_bytes() {{
-                Ok(bytes) => Response::builder()
-                    .header("Content-Type", "application/xml; charset=utf-8")
-                    .body(bytes)
-                    .unwrap(),
-                Err(_) => Response::builder()
-                    .status(500)
-                    .body(Vec::new())
-                    .unwrap(),
-            }}
-        }})
-}}
-"#);
 
     println!("\n=== Tips ===");
     println!("1. Use build_bytes() for standard responses");
