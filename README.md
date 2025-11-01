@@ -29,7 +29,7 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-sitemap_generator = "0.1"
+sitemap_generator = "0.1.1"
 ```
 
 ## Quick Start
