@@ -1,0 +1,72 @@
+[package]
+name = "sitemap_generator"
+version = "0.1.0"
+edition = "2021"
+authors = ["son dang thai <sondt.vn@gmail.com>"]
+license = "MIT"
+description = "A high-performance Rust library for generating XML sitemaps (standard, image, video, and sitemap index)"
+repository = "https://github.com/sondt/sitemap_generator"
+keywords = ["sitemap", "xml", "seo", "web", "generator"]
+categories = ["web-programming", "encoding"]
+readme = "README.md"
+
+[dependencies]
+quick-xml = "0.36"
+flate2 = "1.0"
+url = "2.5"
+chrono = { version = "0.4", features = ["serde"] }
+
+[dev-dependencies]
+tempfile = "3.8"
+criterion = { version = "0.5", features = ["html_reports"] }
+
+[lib]
+name = "sitemap_generator"
+path = "src/lib.rs"
+
+[[example]]
+name = "basic_sitemap"
+path = "examples/basic_sitemap.rs"
+
+[[example]]
+name = "image_sitemap"
+path = "examples/image_sitemap.rs"
+
+[[example]]
+name = "video_sitemap"
+path = "examples/video_sitemap.rs"
+
+[[example]]
+name = "sitemap_index"
+path = "examples/sitemap_index.rs"
+
+[[example]]
+name = "web_framework_usage"
+path = "examples/web_framework_usage.rs"
+
+[[example]]
+name = "compression_test"
+path = "examples/compression_test.rs"
+
+[[example]]
+name = "memory_demo"
+path = "examples/memory_demo.rs"
+
+[[example]]
+name = "news_sitemap"
+path = "examples/news_sitemap.rs"
+
+[[example]]
+name = "combined_sitemap"
+path = "examples/combined_sitemap.rs"
+
+[[example]]
+name = "flamegraph_profile"
+path = "examples/flamegraph_profile.rs"
+
+[[bench]]
+name = "sitemap_benchmarks"
+harness = false
+
+[profile.release]
+debug = true
